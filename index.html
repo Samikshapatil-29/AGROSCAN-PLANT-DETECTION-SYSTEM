@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AgroScan – Scan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">🌿</span>
+    <span class="logo-text">AgroScan</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="/"        class="nav-item active"><span>🔍</span> Scan</a>
+    <a href="/history" class="nav-item"><span>📋</span> History</a>
+    <a href="/profile" class="nav-item"><span>👤</span> Profile</a>
+  </nav>
+
+  <div class="sidebar-user">
+    <div class="user-avatar">{{ user.full_name[0].upper() }}</div>
+    <div class="user-info">
+      <strong>{{ user.full_name }}</strong>
+      <span>{{ user.email }}</span>
+    </div>
+    <a href="/logout" class="logout-btn" title="Logout">⏻</a>
+  </div>
+</div>
+
+<!-- ── Mobile top bar ── -->
+<div class="topbar">
+  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+  <div class="topbar-logo">🌿 AgroScan</div>
+  <a href="/logout" class="topbar-logout">⏻</a>
+</div>
+
+<!-- ── Main content ── -->
+<div class="main-content">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1>Plant Scanner</h1>
+      <p>Capture or upload a leaf image to detect diseases instantly</p>
+    </div>
+
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon green">🌿</div>
+      <div><div class="stat-num" id="stat-total">–</div><div class="stat-label">Total Scans</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon teal">✅</div>
+      <div><div class="stat-num" id="stat-healthy">–</div><div class="stat-label">Healthy</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon red">⚠️</div>
+      <div><div class="stat-num" id="stat-diseased">–</div><div class="stat-label">Diseased</div></div>
+    </div>
+  </div>
+
+  <!-- Scanner card -->
+  <div class="scanner-card">
+
+    <!-- Camera / snapshot area -->
+    <div class="camera-container" id="camera-container">
+      <video id="video" autoplay playsinline></video>
+      <canvas id="canvas" style="display:none;"></canvas>
+      <div class="camera-overlay" id="camera-overlay">
+        <div class="scan-frame"></div>
+        <p class="scan-hint">Position leaf inside the frame</p>
+      </div>
+    </div>
+
+    <img id="snapshot" class="snapshot-img" style="display:none;" alt="Captured leaf"/>
+
+    <!-- Action buttons -->
+    <div class="action-bar">
+      <button id="btn-capture" class="action-btn capture-btn" onclick="captureFrame()">
+        <span class="btn-icon">📷</span> Capture
+      </button>
+      <button id="btn-retake"  class="action-btn retake-btn"  onclick="retake()"   style="display:none;">
+        <span class="btn-icon">🔄</span> Retake
+      </button>
+      <button id="btn-analyse" class="action-btn analyse-btn" onclick="analyse()"  style="display:none;">
+        <span class="btn-icon">🔍</span> Analyse
+      </button>
+    </div>
+
+    <!-- Upload fallback -->
+    <label class="upload-label" for="file-input">
+      <span>📁</span> Or upload from gallery
+      <input type="file" id="file-input" accept="image/*" onchange="handleUpload(event)"/>
+    </label>
+
+  </div>
+
+  <!-- Result card -->
+  <div class="result-card" id="result-card" style="display:none;">
+
+    <!-- ── Plant identity banner ── -->
+    <div class="plant-banner" id="plant-banner">
+      <div class="plant-banner-emoji" id="plant-banner-emoji"></div>
+      <div class="plant-banner-info">
+        <div class="plant-banner-label">Identified Plant</div>
+        <div class="plant-banner-name"  id="plant-banner-name"></div>
+      </div>
+      <div class="plant-banner-badge" id="plant-banner-badge"></div>
+    </div>
+
+    <!-- ── Status + disease row ── -->
+    <div class="result-body">
+      <div class="result-header">
+        <div class="result-emoji" id="result-emoji"></div>
+        <div>
+          <div class="result-status"  id="result-status"></div>
+          <div class="result-disease" id="result-disease"></div>
+        </div>
+      </div>
+
+      <!-- Confidence bar -->
+      <div class="conf-wrap">
+        <div class="conf-label">
+          <span>Detection Confidence</span>
+          <span id="conf-pct"></span>
+        </div>
+        <div class="conf-track">
+          <div class="conf-fill" id="conf-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cure section (hidden for healthy) -->
+    <div class="cure-section" id="cure-section" style="display:none;">
+      <div class="cure-tabs">
+        <button class="cure-tab active" onclick="showCureTab('cause',      this)">🔬 Cause</button>
+        <button class="cure-tab"        onclick="showCureTab('treatment',  this)">💊 Treatment</button>
+        <button class="cure-tab"        onclick="showCureTab('prevention', this)">🛡️ Prevention</button>
+      </div>
+      <div class="cure-body" id="cure-cause"></div>
+      <div class="cure-body" id="cure-treatment"  style="display:none;"></div>
+      <div class="cure-body" id="cure-prevention" style="display:none;"></div>
+    </div>
+
+    <div class="result-tip" id="result-tip"></div>
+  </div>
+
+  <!-- Spinner -->
+  <div class="spinner-wrap" id="spinner" style="display:none;">
+    <div class="spinner-ring"></div>
+    <p>Analysing leaf…</p>
+  </div>
+
+  <!-- Invalid image error card -->
+  <div class="invalid-card" id="invalid-card" style="display:none;">
+    <div class="invalid-icon">🚫</div>
+    <div class="invalid-text">
+      <strong>Invalid Image!</strong>
+      <p>Please upload a clear plant leaf image for disease detection.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Sidebar overlay for mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>

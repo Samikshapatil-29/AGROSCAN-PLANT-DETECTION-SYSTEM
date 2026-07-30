@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AgroScan – History</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <style>
+    /* ── Clickable card hint ── */
+    .history-card {
+      cursor: pointer;
+      position: relative;
+    }
+    .history-card::after {
+      content: "Tap for details →";
+      position: absolute;
+      bottom: 10px; right: 14px;
+      font-size: 0.68rem;
+      color: #bbb;
+      font-style: italic;
+    }
+    .history-card:hover::after { color: #888; }
+
+    /* ══════════════════════════════════════════════
+       MODAL OVERLAY
+    ══════════════════════════════════════════════ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      backdrop-filter: blur(3px);
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes modalIn {
+      from { opacity:0; transform: scale(0.88) translateY(20px); }
+      to   { opacity:1; transform: none; }
+    }
+
+    /* Modal header */
+    .modal-header {
+      padding: 22px 24px 16px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .modal-header-left { display: flex; align-items: center; gap: 14px; }
+    .modal-emoji { font-size: 2.6rem; line-height: 1; }
+    .modal-title { font-size: 1.25rem; font-weight: 700; color: #1a2e1a; }
+    .modal-subtitle { font-size: 0.82rem; color: #888; margin-top: 2px; }
+
+    .modal-close {
+      background: #f5f5f5;
+      border: none;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .modal-close:hover { background: #e0e0e0; }
+
+    /* Status + confidence row */
+    .modal-meta {
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .modal-badge {
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .modal-badge.healthy  { background: #e8f5e9; color: #1b5e20; }
+    .modal-badge.diseased { background: #ffebee; color: #c62828; }
+
+    .modal-conf-wrap { flex: 1; }
+    .modal-conf-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+    .modal-conf-track {
+      background: #f0f0f0;
+      border-radius: 20px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .modal-conf-fill {
+      height: 100%;
+      border-radius: 20px;
+      transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+    }
+    .modal-conf-fill.fill-green { background: linear-gradient(90deg,#81c784,#2e7d32); }
+    .modal-conf-fill.fill-red   { background: linear-gradient(90deg,#ef9a9a,#c62828); }
+
+    .modal-date { font-size: 0.75rem; color: #bbb; white-space: nowrap; }
+
+    /* Cure tabs inside modal */
+    .modal-cure { padding: 0 0 8px; }
+
+    .modal-cure .cure-tabs {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      border-radius: 0;
+    }
+    .modal-cure .cure-tab { border-radius: 0; }
+
+    /* Healthy tip */
+    .modal-healthy-tip {
+      margin: 20px 24px;
+      background: linear-gradient(135deg,#e8f5e9,#f1f8e9);
+      border-radius: 14px;
+      padding: 18px 20px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      border-left: 4px solid #43a047;
+    }
+    .modal-healthy-tip .tip-icon { font-size: 2rem; flex-shrink: 0; }
+    .modal-healthy-tip .tip-text { color: #1b5e20; font-size: 0.9rem; line-height: 1.6; }
+    .modal-healthy-tip .tip-label {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: #2e7d32; margin-bottom: 4px;
+    }
+
+    /* Loading state inside modal */
+    .modal-loading {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">🌿</span>
+    <span class="logo-text">AgroScan</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/"        class="nav-item"><span>🔍</span> Scan</a>
+    <a href="/history" class="nav-item active"><span>📋</span> History</a>
+    <a href="/profile" class="nav-item"><span>👤</span> Profile</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar">{{ user.full_name[0].upper() }}</div>
+    <div class="user-info">
+      <strong>{{ user.full_name }}</strong>
+      <span>{{ user.email }}</span>
+    </div>
+    <a href="/logout" class="logout-btn" title="Logout">⏻</a>
+  </div>
+</div>
+
+<!-- ── Mobile topbar ── -->
+<div class="topbar">
+  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+  <div class="topbar-logo">🌿 AgroScan</div>
+  <a href="/logout" class="topbar-logout">⏻</a>
+</div>
+
+<!-- ── Main content ── -->
+<div class="main-content">
+  <div class="page-header">
+    <div>
+      <h1>Scan History</h1>
+      <p>Click any scan to see full disease details</p>
+    </div>
+  </div>
+
+  <div class="filter-pills">
+    <button class="pill active" onclick="filterScans('all',      this)">All</button>
+    <button class="pill"        onclick="filterScans('Healthy',  this)">✅ Healthy</button>
+    <button class="pill"        onclick="filterScans('Diseased', this)">⚠️ Diseased</button>
+  </div>
+
+  <div id="history-grid" class="history-grid">
+    <div class="loading-state">
+      <div class="spinner-ring"></div>
+      <p>Loading scans…</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Detail Modal ── -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnBg(event)">
+  <div class="modal" id="modal">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-emoji" id="modal-emoji"></div>
+        <div>
+          <div class="modal-title"    id="modal-title"></div>
+          <div class="modal-subtitle" id="modal-subtitle"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <!-- Confidence + date -->
+    <div class="modal-meta">
+      <span class="modal-badge" id="modal-badge"></span>
+      <div class="modal-conf-wrap">
+        <div class="modal-conf-label">
+          <span>Confidence</span>
+          <span id="modal-conf-pct"></span>
+        </div>
+        <div class="modal-conf-track">
+          <div class="modal-conf-fill" id="modal-conf-fill"></div>
+        </div>
+      </div>
+      <div class="modal-date" id="modal-date"></div>
+    </div>
+
+    <!-- Cure / healthy content -->
+    <div id="modal-body"></div>
+
+  </div>
+</div>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<script src="/static/script.js"></script>
+<script>
+  let allScans = [];
+
+  // ── Load scans ────────────────────────────────────────────────────────
+  fetch("/api/history")
+    .then(r => r.json())
+    .then(data => { allScans = data; renderScans(data); })
+    .catch(() => {
+      document.getElementById("history-grid").innerHTML =
+        "<p class='empty-state'>Could not load history.</p>";
+    });
+
+  // ── Render cards ──────────────────────────────────────────────────────
+  function renderScans(scans) {
+    const grid = document.getElementById("history-grid");
+    if (!scans.length) {
+      grid.innerHTML = "<p class='empty-state'>No scans yet. Go scan a leaf! 🌿</p>";
+      return;
+    }
+    grid.innerHTML = scans.map((s, i) => `
+      <div class="history-card ${s.status === 'Healthy' ? 'h-healthy' : 'h-diseased'}"
+           onclick="openModal(${i}, ${JSON.stringify(s).replace(/"/g,'&quot;')})">
+        <div class="hcard-top">
+          <span class="hcard-icon">${s.status === 'Healthy' ? '✅' : '⚠️'}</span>
+          <span class="hcard-status ${s.status === 'Healthy' ? 'badge-green' : 'badge-red'}">${s.status}</span>
+        </div>
+        <div class="hcard-plant">${s.plant}</div>
+        <div class="hcard-disease">${s.disease}</div>
+        <div class="hcard-footer">
+          <div class="hcard-conf-bar">
+            <div class="hcard-conf-fill ${s.status === 'Healthy' ? 'fill-green' : 'fill-red'}"
+                 style="width:${s.confidence}%"></div>
+          </div>
+          <div class="hcard-meta">
+            <span>${s.confidence}%</span>
+            <span>${new Date(s.scanned_at).toLocaleDateString()}</span>
+          </div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  // ── Filter ────────────────────────────────────────────────────────────
+  function filterScans(filter, btn) {
+    document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    renderScans(filter === "all" ? allScans : allScans.filter(s => s.status === filter));
+  }
+
+  // ── Open modal ────────────────────────────────────────────────────────
+  function openModal(idx, scan) {
+    const isHealthy = scan.status === "Healthy";
+
+    document.getElementById("modal-emoji").textContent    = isHealthy ? "✅" : "⚠️";
+    document.getElementById("modal-title").textContent    = scan.plant;
+    document.getElementById("modal-subtitle").textContent = scan.disease;
+    document.getElementById("modal-conf-pct").textContent = scan.confidence + "%";
+    document.getElementById("modal-date").textContent     =
+      new Date(scan.scanned_at).toLocaleString();
+
+    const badge = document.getElementById("modal-badge");
+    badge.textContent = scan.status;
+    badge.className   = "modal-badge " + (isHealthy ? "healthy" : "diseased");
+
+    const fill = document.getElementById("modal-conf-fill");
+    fill.className   = "modal-conf-fill " + (isHealthy ? "fill-green" : "fill-red");
+    fill.style.width = "0%";
+    setTimeout(() => { fill.style.width = scan.confidence + "%"; }, 80);
+
+    // Show loading while fetching cure
+    document.getElementById("modal-body").innerHTML = `
+      <div class="modal-loading">
+        <div class="spinner-ring"></div>
+        <p>Loading details…</p>
+      </div>`;
+
+    document.getElementById("modal-overlay").classList.add("open");
+    document.body.style.overflow = "hidden";
+
+    // Fetch cure info
+    fetch("/api/cure/" + encodeURIComponent(scan.disease))
+      .then(r => r.json())
+      .then(cure => renderModalBody(cure, isHealthy))
+      .catch(() => renderModalBody(null, isHealthy));
+  }
+
+  // ── Render cure inside modal ──────────────────────────────────────────
+  function renderModalBody(cure, isHealthy) {
+    const body = document.getElementById("modal-body");
+
+    if (isHealthy || !cure) {
+      body.innerHTML = `
+        <div class="modal-healthy-tip">
+          <div class="tip-icon">🌱</div>
+          <div>
+            <div class="tip-label">Plant Status</div>
+            <div class="tip-text">
+              This leaf appears <strong>healthy</strong> with no visible signs of disease.
+              Keep monitoring regularly and maintain good agricultural practices.
+            </div>
+          </div>
+        </div>`;
+      return;
+    }
+
+    // Build treatment steps
+    const steps = cure.treatment.map((t, i) => `
+      <li>
+        <div class="step-num">${i + 1}</div>
+        <div class="step-text">${t}</div>
+      </li>`).join("");
+
+    body.innerHTML = `
+      <div class="modal-cure">
+        <div class="cure-tabs">
+          <button class="cure-tab active" onclick="modalTab('cause',      this)">🔬 Cause</button>
+          <button class="cure-tab"        onclick="modalTab('treatment',  this)">💊 Treatment</button>
+          <button class="cure-tab"        onclick="modalTab('prevention', this)">🛡️ Prevention</button>
+        </div>
+
+        <div class="cure-body" id="mcure-cause">
+          <div class="cure-cause-card">
+            <div class="cause-icon">🔬</div>
+            <div>
+              <div class="cause-label">Root Cause</div>
+              <div class="cause-text">${cure.cause}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cure-body" id="mcure-treatment" style="display:none;">
+          <ul class="treatment-list">${steps}</ul>
+        </div>
+
+        <div class="cure-body" id="mcure-prevention" style="display:none;">
+          <div class="prevention-card">
+            <div class="prev-icon">🛡️</div>
+            <div>
+              <div class="prev-label">Prevention Tips</div>
+              <div class="prev-text">${cure.prevention}</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── Modal tab switcher ────────────────────────────────────────────────
+  function modalTab(tab, btn) {
+    ["mcure-cause", "mcure-treatment", "mcure-prevention"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    });
+    const target = document.getElementById("mcure-" + tab);
+    if (target) target.style.display = "block";
+
+    document.querySelectorAll(".modal-cure .cure-tab")
+      .forEach(t => t.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+  }
+
+  // ── Close modal ───────────────────────────────────────────────────────
+  function closeModal() {
+    document.getElementById("modal-overlay").classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  function closeModalOnBg(e) {
+    if (e.target === document.getElementById("modal-overlay")) closeModal();
+  }
+
+  // Close on Escape key
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+</script>
+</body>
+</html>
