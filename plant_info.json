@@ -1,0 +1,192 @@
+{
+  "0": {
+    "plant": "Apple",
+    "disease": "Apple scab",
+    "status": "Diseased"
+  },
+  "1": {
+    "plant": "Apple",
+    "disease": "Black rot",
+    "status": "Diseased"
+  },
+  "2": {
+    "plant": "Apple",
+    "disease": "Cedar apple rust",
+    "status": "Diseased"
+  },
+  "3": {
+    "plant": "Apple",
+    "disease": "healthy",
+    "status": "Healthy"
+  },
+  "4": {
+    "plant": "Blueberry",
+    "disease": "healthy",
+    "status": "Healthy"
+  },
+  "5": {
+    "plant": "Cherry (including sour)",
+    "disease": "Powdery mildew",
+    "status": "Diseased"
+  },
+  "6": {
+    "plant": "Cherry (including sour)",
+    "disease": "healthy",
+    "status": "Healthy"
+  },
+  "7": {
+    "plant": "Corn (maize)",
+    "disease": "Cercospora leaf spot Gray leaf spot",
+    "status": "Diseased"
+  },
+  "8": {
+    "plant": "Corn (maize)",
+    "disease": "Common rust",
+    "status": "Diseased"
+  },
+  "9": {
+    "plant": "Corn (maize)",
+    "disease": "Northern Leaf Blight",
+    "status": "Diseased"
+  },
+  "10": {
+    "plant": "Corn (maize)",
+    "disease": "healthy",
+    "status": "Healthy"
+  },
+  "11": {
+    "plant": "Grape",
+    "disease": "Black rot",
+    "status": "Diseased"
+  },
+  "12": {
+    "plant": "Grape",
+    "disease": "Esca (Black Measles)",
+    "status": "Diseased"
+  },
+  "13": {
+    "plant": "Grape",
+    "disease": "Leaf blight (Isariopsis Leaf Spot)",
+    "status": "Diseased"
+  },
+  "14": {
+    "plant": "Grape",
+    "disease": "healthy",
+    "status": "Healthy"
+  },
+  "15": {
+    "plant": "Orange",
+    "disease": "Haunglongbing (Citrus greening)",
+    "status": "Diseased"
+  },
+  "16": {
+    "plant": "Peach",
+    "disease": "Bacterial spot",
+    "status": "Diseased"
+  },
+  "17": {
+    "plant": "Peach",
+    "disease": "healthy",
+    "status": "Healthy"
+  },
+  "18": {
+    "plant": "Pepper, bell",
+    "disease": "Bacterial spot",
+    "status": "Diseased"
+  },
+  "19": {
+    "plant": "Pepper, bell",
+    "disease": "healthy",
+    "status": "Healthy"
+  },
+  "20": {
+    "plant": "Potato",
+    "disease": "Early blight",
+    "status": "Diseased"
+  },
+  "21": {
+    "plant": "Potato",
+    "disease": "Late blight",
+    "status": "Diseased"
+  },
+  "22": {
+    "plant": "Potato",
+    "disease": "healthy",
+    "status": "Healthy"
+  },
+  "23": {
+    "plant": "Raspberry",
+    "disease": "healthy",
+    "status": "Healthy"
+  },
+  "24": {
+    "plant": "Soybean",
+    "disease": "healthy",
+    "status": "Healthy"
+  },
+  "25": {
+    "plant": "Squash",
+    "disease": "Powdery mildew",
+    "status": "Diseased"
+  },
+  "26": {
+    "plant": "Strawberry",
+    "disease": "Leaf scorch",
+    "status": "Diseased"
+  },
+  "27": {
+    "plant": "Strawberry",
+    "disease": "healthy",
+    "status": "Healthy"
+  },
+  "28": {
+    "plant": "Tomato",
+    "disease": "Bacterial spot",
+    "status": "Diseased"
+  },
+  "29": {
+    "plant": "Tomato",
+    "disease": "Early blight",
+    "status": "Diseased"
+  },
+  "30": {
+    "plant": "Tomato",
+    "disease": "Late blight",
+    "status": "Diseased"
+  },
+  "31": {
+    "plant": "Tomato",
+    "disease": "Leaf Mold",
+    "status": "Diseased"
+  },
+  "32": {
+    "plant": "Tomato",
+    "disease": "Septoria leaf spot",
+    "status": "Diseased"
+  },
+  "33": {
+    "plant": "Tomato",
+    "disease": "Spider mites Two-spotted spider mite",
+    "status": "Diseased"
+  },
+  "34": {
+    "plant": "Tomato",
+    "disease": "Target Spot",
+    "status": "Diseased"
+  },
+  "35": {
+    "plant": "Tomato",
+    "disease": "Tomato Yellow Leaf Curl Virus",
+    "status": "Diseased"
+  },
+  "36": {
+    "plant": "Tomato",
+    "disease": "Tomato mosaic virus",
+    "status": "Diseased"
+  },
+  "37": {
+    "plant": "Tomato",
+    "disease": "healthy",
+    "status": "Healthy"
+  }
+}
